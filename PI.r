@@ -9,11 +9,13 @@ install.packages('lme4')
 install.packages("dplyr")
 install.packages("gapminder")
 
+library(lubridate)
 library(ggplot2)
 library(ggthemes)
 library(hrbrthemes)
 library(dplyr)
 library(gapminder)
+
 
 # Function for get MODE
 getmode <- function(v) {
@@ -32,6 +34,7 @@ firstC_2017  <- firstC_2017[-c(1,10:45)]
 
 # Converting column valor de venda for numeric
 firstC_2017$Valor.de.Venda <- as.numeric(sub(",", ".", firstC_2017$Valor.de.Venda))
+firstC_2017$Data.da.Coleta <- as.Date(firstC_2017$Data.da.Coleta, "%d/%m/%Y")
 firstC_2017 <- firstC_2017[!is.na(as.numeric(as.character(firstC_2017$Valor.de.Venda))),]
 
 #Cleaning data
@@ -51,6 +54,7 @@ secondC_2017  <-  read.csv(file="2017-2_CA.csv", sep=";", encoding="ISO-8859-1")
 secondC_2017  <- secondC_2017[-c(1,10:45)]
 
 secondC_2017$Valor.de.Venda <- as.numeric(sub(",", ".", secondC_2017$Valor.de.Venda))
+secondC_2017$Data.da.Coleta <- as.Date(secondC_2017$Data.da.Coleta, "%d/%m/%Y")
 secondC_2017 <- secondC_2017[!is.na(as.numeric(as.character(secondC_2017$Valor.de.Venda))),]
 
 na.omit(secondC_2017)
@@ -65,6 +69,7 @@ firstC_2018  <-  read.csv(file="2018-1_CA.csv", sep=";", encoding="ISO-8859-1")
 firstC_2018  <- firstC_2018[-c(1,10:45)]
 
 firstC_2018$Valor.de.Venda <- as.numeric(sub(",", ".", firstC_2018$Valor.de.Venda))
+firstC_2018$Data.da.Coleta <- as.Date(firstC_2018$Data.da.Coleta, "%d/%m/%Y")
 firstC_2018 <- firstC_2018[!is.na(as.numeric(as.character(firstC_2018$Valor.de.Venda))),]
 
 na.omit(firstC_2018)
@@ -75,10 +80,11 @@ median_2018_1 <- median(firstC_2018$Valor.de.Venda)
 mode_2018_1   <- getmode(firstC_2018$Valor.de.Venda)
 
 #--------------------------------------------------------2018/2----------------------------------#
-secondC_2018 <-  read.csv(file="2018-2_CA.csv", sep=";", encoding="ISO-8859-1")
+secondC_2018  <-  read.csv(file="2018-2_CA.csv", sep=";", encoding="ISO-8859-1")
 secondC_2018  <- secondC_2018[-c(1,10:45)]
 
 secondC_2018$Valor.de.Venda <- as.numeric(sub(",", ".", secondC_2018$Valor.de.Venda))
+secondC_2018$Data.da.Coleta <- as.Date(secondC_2018$Data.da.Coleta, "%d/%m/%Y")
 secondC_2018 <- secondC_2018[!is.na(as.numeric(as.character(secondC_2018$Valor.de.Venda))),]
 
 na.omit(secondC_2018)
@@ -93,6 +99,7 @@ firstC_2019  <-  read.csv(file="2019-1_CA.csv", sep=";", encoding="ISO-8859-1")
 firstC_2019  <- firstC_2019[-c(1,10:45)]
 
 firstC_2019$Valor.de.Venda <- as.numeric(sub(",", ".", firstC_2019$Valor.de.Venda))
+firstC_2019$Data.da.Coleta <- as.Date(firstC_2019$Data.da.Coleta, "%d/%m/%Y")
 firstC_2019 <- firstC_2019[!is.na(as.numeric(as.character(firstC_2019$Valor.de.Venda))),]
 
 na.omit(firstC_2019)
@@ -112,14 +119,38 @@ infos <- data.frame(
    mode   = c(mode_2017_1,   median_2017_2, mode_2018_1,   mode_2018_2,    mode_2019_1),
    data   = c('2017/1', '2017/2', '2018/1', '2018/2', '2019/1')
 )
-print(infos)
-
+infos
 # Line chart upgrade fuel price in 2017-1 2017-2
+infos %>%
+   filter(data %in% c('2017/1','2017/2')) %>%
+      ggplot(., aes(x = data, y= median, group = 2 ))                            + 
+         geom_line(color="#69b3a2", size=1, alpha=0.9)                           +
+         labs(x="Semestre", y="Valor em R$")                                     +
+         theme_ipsum()                                                           +
+         theme(plot.title = element_text(hjust = 0.5))                           +
+         ggtitle("Evolução do preço mediano do combustível de 2017/1 á 2017/2")
 
-ggplot(infos, aes(x = data, y= median, group = 1, ))              +
-   geom_line(color="#69b3a2", size=1, alpha=0.9)                  +                           
-   theme_ipsum()                                                  +
-   ggtitle("Evolução do preço do combustivel de 2017/1 á 2019/1")
+# Line chart of full year month median value
+firstYear <- rbind(firstC_2017, secondC_2017)
+
+firstYear %>%
+   select(Data.da.Coleta, Valor.de.Venda)              %>%
+   group_by(month=floor_date(Data.da.Coleta, "month")) %>%
+   summarise(medianByMonth = median(Valor.de.Venda))
+
+firstYear %>%
+   select(Data.da.Coleta, Valor.de.Venda)              %>%
+   group_by(month=floor_date(Data.da.Coleta, "month")) %>%
+   summarise(medianByMonth = median(Valor.de.Venda))   %>%
+      ggplot(., aes(x = month, y= medianByMonth, group = 2 ))                    + 
+         geom_line(color="#69b3a2", size=1, alpha=0.9)                           +
+         labs(x="Semestre", y="Valor em R$")                                     +
+         theme_ipsum()                                                           +
+         theme(plot.title = element_text(hjust = 0.5))                           +
+         ggtitle("Evolução do preço mediano do combustível de 2017/1 á 2017/2")  
+
+
+
 
 # Bar chart with mean median and mode
 ggplot(infos)                                                                        +
