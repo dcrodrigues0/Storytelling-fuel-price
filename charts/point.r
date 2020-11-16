@@ -37,12 +37,42 @@ ggplot()                                                                        
    ggtitle("Tendência central da evolução do preço do combustível de 2017/1 á 2017/2 por estado")   
 
 
-# ggplot()                                                                                                                           + 
-#    geom_bar(stat = "identity", data=firstMeanGasolina,  aes(x = state, y= meanByState,   fill = "Gasolina"),  size=1, alpha=0.9)   +
-#    geom_bar(stat = "identity", data=firstMeanDieselS10, aes(x = state, y= meanByState,   fill = "Diesel S10"),  size=1, alpha=0.9) +
-#    geom_bar(stat = "identity",  data=firstMeanDiesel,    aes(x = state, y= meanByState,  fill = "Diesel"),  size=1, alpha=0.9)     +
-#    geom_bar(stat = "identity",  data=firstMeanEtanol,    aes(x = state, y= meanByState,  fill = "Etanol"),  size=1, alpha=0.9)     +
-#    labs(x="Estado", y="Valor em R$")                                                                                               +
-#    theme_ipsum()                                                                                                                   +
-#    theme(plot.title = element_text(hjust = 0.5))                                                                                   +
-#    ggtitle("Tendência central da evolução do preço do combustível de 2017/1 á 2017/2 por estado")   
+
+secondYear <- rbind(firstC_2018, secondC_2018)
+secondYear$Estado...Sigla <- sub(" ", "", secondYear$Estado...Sigla)
+
+firstMeanGasolina <- secondYear                                          %>%
+                     select(Estado...Sigla, Valor.de.Venda, Produto)     %>%
+                     filter(Produto == 'GASOLINA')                       %>%
+                     group_by(state=Estado...Sigla)                      %>%
+                     summarise(meanByState = mean(Valor.de.Venda))       
+
+firstMeanDieselS10 <- secondYear                                         %>%
+                     select(Estado...Sigla, Valor.de.Venda, Produto)     %>%
+                     filter(Produto == 'DIESEL S10')                     %>%
+                     group_by(state=Estado...Sigla)                      %>%
+                     summarise(meanByState = mean(Valor.de.Venda))       
+
+firstMeanDiesel    <- secondYear                                         %>%
+                     select(Estado...Sigla, Valor.de.Venda, Produto)     %>%
+                     filter(Produto == 'DIESEL')                         %>%
+                     group_by(state=Estado...Sigla)                      %>%
+                     summarise(meanByState = mean(Valor.de.Venda))       
+
+firstMeanEtanol <- secondYear                                            %>%
+                     select(Estado...Sigla, Valor.de.Venda, Produto)     %>%
+                     filter(Produto == 'ETANOL')                         %>%
+                     group_by(state=Estado...Sigla)                      %>%
+                     summarise(meanByState = mean(Valor.de.Venda))    
+
+ggplot()                                                                                                                   + 
+   geom_point(data=firstMeanGasolina,  aes(x = state, y= meanByState,  color = "Gasolina",   size=meanByState), alpha=0.9) +
+   geom_point(data=firstMeanDieselS10, aes(x = state, y= meanByState,  color = "Diesel S10", size=meanByState), alpha=0.9) +
+   geom_point(data=firstMeanDiesel,    aes(x = state, y= meanByState,  color = "Diesel",     size=meanByState), alpha=0.9) +
+   geom_point(data=firstMeanEtanol,    aes(x = state, y= meanByState,  color = "Etanol",     size=meanByState), alpha=0.9) +
+   labs(x="Estado", y="Valor em R$")                                                                                       +
+   theme_ipsum()                                                                                                           +
+   theme(plot.title = element_text(hjust = 0.5))                                                                           +
+   ggtitle("Tendência central da evolução do preço do combustível de 2018/1 á 2018/2 por estado")   
+
+View(secondYear)

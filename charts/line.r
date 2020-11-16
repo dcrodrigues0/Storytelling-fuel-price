@@ -132,14 +132,48 @@ ggplot()                                                                        
    theme_ipsum()                                                                                               +
    theme(plot.title = element_text(hjust = 0.5))                                                               +
    ggtitle("TendÃªncia central da evoluÃ§Ã£o do preÃ§o do combustÃ­vel no mÃªs de Maio de 2018")
-   
-dataSet <- data.frame(
-   meanByDay   = c(firstMeanGnv$meanByDay, firstMeanEtanol$meanByDay, firstMeanDiesel$meanByDay, firstMeanDieselS10$meanByDay, firstMeanGasolina$meanByDay),
-   day = c(firstMeanGnv$day, firstMeanEtanol$day, firstMeanDiesel$day, firstMeanDieselS10$day, firstMeanGasolina$day))
 
-typeFuel = c()
-for(gnv in firstMeanGnv){ 
-   append(typeFuel, 'GNV')
-}
-print(typeFuel)
 
+
+# Line chart of full first year month mean value by type
+firstMeanGasolina <- firstC_2019                                         %>%
+                     select(Data.da.Coleta, Valor.de.Venda, Produto)     %>%
+                     filter(Produto == 'GASOLINA')                       %>%
+                     group_by(month=floor_date(Data.da.Coleta, "month")) %>%
+                     summarise(meanByMonth = mean(Valor.de.Venda))       
+
+firstMeanDieselS10 <- firstC_2019                                        %>%
+                     select(Data.da.Coleta, Valor.de.Venda, Produto)     %>%
+                     filter(Produto == 'DIESEL S10')                     %>%
+                     group_by(month=floor_date(Data.da.Coleta, "month")) %>%
+                     summarise(meanByMonth = mean(Valor.de.Venda))       
+
+firstMeanDiesel    <- firstC_2019                                        %>%
+                     select(Data.da.Coleta, Valor.de.Venda, Produto)     %>%
+                     filter(Produto == 'DIESEL')                         %>%
+                     group_by(month=floor_date(Data.da.Coleta, "month")) %>%
+                     summarise(meanByMonth = mean(Valor.de.Venda))       
+
+firstMeanEtanol <- firstC_2019                                           %>%
+                     select(Data.da.Coleta, Valor.de.Venda, Produto)     %>%
+                     filter(Produto == 'ETANOL')                         %>%
+                     group_by(month=floor_date(Data.da.Coleta, "month")) %>%
+                     summarise(meanByMonth = mean(Valor.de.Venda))    
+
+firstMeanGnv    <- firstC_2019                                           %>% 
+                     select(Data.da.Coleta, Valor.de.Venda, Produto)     %>%
+                     filter(Produto == 'GNV')                            %>%
+                     group_by(month=floor_date(Data.da.Coleta, 'month')) %>%
+                     summarise(meanByMonth = mean(Valor.de.Venda))
+
+
+ggplot()                                                                                                           + 
+   geom_line(data=firstMeanGasolina,  aes(x = month, y= meanByMonth,  color = "Gasolina"),    size=1.3, alpha=0.9) +
+   geom_line(data=firstMeanDieselS10, aes(x = month, y= meanByMonth,  color = "Diesel S10"),  size=1.3, alpha=0.9) +
+   geom_line(data=firstMeanDiesel,    aes(x = month, y= meanByMonth,  color = "Diesel"),      size=1.3, alpha=0.9) +
+   geom_line(data=firstMeanEtanol,    aes(x = month, y= meanByMonth,  color = "Etanol"),      size=1.3, alpha=0.9) +
+   geom_line(data=firstMeanGnv,       aes(x = month, y = meanByMonth, color = 'GNV'),         size=1.3, alpha=0.9) +
+   labs(x="Semestre", y="Valor em R$")                                                                             +
+   theme_ipsum()                                                                                                   +
+   theme(plot.title = element_text(hjust = 0.5))                                                                   +
+   ggtitle("Tendência central da evolução do preço do combustível de 2019/1")
